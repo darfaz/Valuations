@@ -1,212 +1,309 @@
-// Smooth scroll animations on intersection
-document.addEventListener('DOMContentLoaded', () => {
-    // Add scroll-animate class to sections
-    const animateElements = document.querySelectorAll(
-        '.about-content, .about-image, .service-card, .experience-item, .contact-content, .contact-form, .section-header'
-    );
+// Mobile Menu Toggle
+const navToggle = document.querySelector('.nav-toggle');
+const mobileMenu = document.querySelector('.mobile-menu');
+const mobileLinks = document.querySelectorAll('.mobile-menu-links a');
+const body = document.body;
+
+function toggleMenu() {
+    navToggle.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+    body.classList.toggle('menu-open');
+}
+
+navToggle?.addEventListener('click', toggleMenu);
+
+// Close mobile menu when clicking a link
+mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        if (mobileMenu.classList.contains('active')) {
+            toggleMenu();
+        }
+    });
+});
+
+// Close menu on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+        toggleMenu();
+    }
+});
+
+// Navbar scroll effect
+const nav = document.querySelector('.nav');
+let lastScroll = 0;
+
+window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
     
-    animateElements.forEach(el => {
-        el.classList.add('scroll-animate');
+    if (currentScroll > 50) {
+        nav.classList.add('scrolled');
+    } else {
+        nav.classList.remove('scrolled');
+    }
+    
+    lastScroll = currentScroll;
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            const offset = 80;
+            const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+            
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        }
     });
+});
 
-    // Intersection Observer for scroll animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
+// Testimonial slider
+const testimonials = document.querySelectorAll('.testimonial');
+const dotsContainer = document.querySelector('.testimonial-dots');
+let currentTestimonial = 0;
+let testimonialInterval;
 
-    document.querySelectorAll('.scroll-animate').forEach(el => {
-        observer.observe(el);
-    });
-
-    // Stagger animation for service cards
-    const serviceCards = document.querySelectorAll('.service-card');
-    serviceCards.forEach((card, index) => {
-        card.style.transitionDelay = `${index * 0.1}s`;
-    });
-
-    // Stagger animation for experience items
-    const expItems = document.querySelectorAll('.experience-item');
-    expItems.forEach((item, index) => {
-        item.style.transitionDelay = `${index * 0.15}s`;
-    });
-
-    // Testimonial Slider
-    const testimonials = document.querySelectorAll('.testimonial');
-    const dotsContainer = document.querySelector('.testimonial-dots');
-    let currentSlide = 0;
-
-    // Create dots
+// Create dots
+if (testimonials.length > 0 && dotsContainer) {
     testimonials.forEach((_, index) => {
         const dot = document.createElement('button');
         dot.classList.add('dot');
         if (index === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(index));
+        dot.setAttribute('aria-label', `Go to testimonial ${index + 1}`);
+        dot.addEventListener('click', () => {
+            goToTestimonial(index);
+            resetInterval();
+        });
         dotsContainer.appendChild(dot);
     });
+}
 
-    // Style dots
-    const style = document.createElement('style');
-    style.textContent = `
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
+const dots = document.querySelectorAll('.dot');
+
+function goToTestimonial(index) {
+    testimonials[currentTestimonial].classList.remove('active');
+    dots[currentTestimonial]?.classList.remove('active');
+    
+    currentTestimonial = index;
+    
+    testimonials[currentTestimonial].classList.add('active');
+    dots[currentTestimonial]?.classList.add('active');
+}
+
+function nextTestimonial() {
+    const next = (currentTestimonial + 1) % testimonials.length;
+    goToTestimonial(next);
+}
+
+function resetInterval() {
+    clearInterval(testimonialInterval);
+    testimonialInterval = setInterval(nextTestimonial, 5000);
+}
+
+// Start auto-rotation
+if (testimonials.length > 1) {
+    testimonialInterval = setInterval(nextTestimonial, 5000);
+}
+
+// Scroll animations
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
         }
-        .dot.active {
-            background: var(--color-accent);
-            transform: scale(1.2);
-        }
-        .dot:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-    `;
-    document.head.appendChild(style);
-
-    function goToSlide(index) {
-        testimonials[currentSlide].classList.remove('active');
-        document.querySelectorAll('.dot')[currentSlide].classList.remove('active');
-        currentSlide = index;
-        testimonials[currentSlide].classList.add('active');
-        document.querySelectorAll('.dot')[currentSlide].classList.add('active');
-    }
-
-    // Auto-advance testimonials
-    setInterval(() => {
-        goToSlide((currentSlide + 1) % testimonials.length);
-    }, 5000);
-
-    // Navbar background on scroll
-    const nav = document.querySelector('.nav');
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.pageYOffset;
-        
-        if (currentScroll > 100) {
-            nav.style.background = 'rgba(10, 10, 10, 0.95)';
-            nav.style.backdropFilter = 'blur(20px)';
-        } else {
-            nav.style.background = 'linear-gradient(to bottom, rgba(10, 10, 10, 0.9), transparent)';
-        }
-        
-        lastScroll = currentScroll;
     });
+}, observerOptions);
 
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
+// Add scroll-animate class to sections
+document.querySelectorAll('.service-card, .experience-item, .why-card, .about-grid, .contact-grid').forEach(el => {
+    el.classList.add('scroll-animate');
+    observer.observe(el);
+});
 
-    // Parallax effect on hero
-    const hero = document.querySelector('.hero');
+// Parallax effect on hero glow
+const heroGlow = document.querySelector('.hero-bg-glow');
+if (heroGlow) {
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
-        if (scrolled < window.innerHeight) {
-            hero.style.transform = `translateY(${scrolled * 0.3}px)`;
-            hero.style.opacity = 1 - (scrolled / window.innerHeight) * 0.5;
+        heroGlow.style.transform = `translateX(-50%) translateY(${scrolled * 0.3}px)`;
+    });
+}
+
+// Form submission handling
+const contactForm = document.querySelector('.contact-form');
+if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalContent = submitBtn.innerHTML;
+        
+        // Show loading state
+        submitBtn.innerHTML = `
+            <span>Sending...</span>
+            <svg class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32">
+                    <animate attributeName="stroke-dashoffset" values="32;0" dur="1s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        `;
+        submitBtn.disabled = true;
+        
+        // Simulate form submission (replace with actual endpoint)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Show success state
+        submitBtn.innerHTML = `
+            <span>Message Sent!</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 13l4 4L19 7"/>
+            </svg>
+        `;
+        submitBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+        
+        // Reset form
+        setTimeout(() => {
+            contactForm.reset();
+            submitBtn.innerHTML = originalContent;
+            submitBtn.style.background = '';
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+}
+
+// Add CSS for dots
+const style = document.createElement('style');
+style.textContent = `
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+    
+    .dot:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .dot.active {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        width: 24px;
+        border-radius: 5px;
+    }
+    
+    .btn-spinner {
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+// Stats counter animation
+const stats = document.querySelectorAll('.stat-number');
+const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const target = entry.target;
+            const text = target.textContent;
+            const num = parseInt(text);
+            const suffix = text.replace(/[0-9]/g, '');
+            
+            if (!isNaN(num)) {
+                animateCounter(target, 0, num, 2000, suffix);
+            }
+            statsObserver.unobserve(target);
         }
     });
+}, { threshold: 0.5 });
 
-    // Mouse follow effect on hero (subtle)
-    const heroContent = document.querySelector('.hero-content');
-    hero.addEventListener('mousemove', (e) => {
-        const rect = hero.getBoundingClientRect();
-        const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
-        const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+stats.forEach(stat => statsObserver.observe(stat));
+
+function animateCounter(element, start, end, duration, suffix) {
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
         
-        heroContent.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
-    });
-
-    hero.addEventListener('mouseleave', () => {
-        heroContent.style.transform = 'translate(0, 0)';
-    });
-
-    // Form handling
-    const form = document.querySelector('.contact-form');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Add your form submission logic here
-            const formData = new FormData(form);
-            console.log('Form submitted:', Object.fromEntries(formData));
-            
-            // Show success message
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn.textContent;
-            btn.textContent = 'Message Sent!';
-            btn.style.background = 'var(--color-highlight)';
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '';
-                form.reset();
-            }, 3000);
-        });
+        // Ease out cubic
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (end - start) * easeOut);
+        
+        element.textContent = current + suffix;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
     }
+    
+    requestAnimationFrame(update);
+}
 
-    // Add magnetic effect to buttons
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            
-            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
-        });
+// Cursor glow effect (desktop only)
+if (window.matchMedia('(min-width: 768px)').matches) {
+    const cursor = document.createElement('div');
+    cursor.className = 'cursor-glow';
+    document.body.appendChild(cursor);
+    
+    const cursorStyle = document.createElement('style');
+    cursorStyle.textContent = `
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
         
-        btn.addEventListener('mouseleave', () => {
-            btn.style.transform = '';
-        });
+        body:hover .cursor-glow {
+            opacity: 1;
+        }
+    `;
+    document.head.appendChild(cursorStyle);
+    
+    let cursorX = 0, cursorY = 0;
+    let currentX = 0, currentY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        cursorX = e.clientX;
+        cursorY = e.clientY;
     });
+    
+    function animateCursor() {
+        currentX += (cursorX - currentX) * 0.1;
+        currentY += (cursorY - currentY) * 0.1;
+        
+        cursor.style.left = currentX + 'px';
+        cursor.style.top = currentY + 'px';
+        
+        requestAnimationFrame(animateCursor);
+    }
+    
+    animateCursor();
+}
 
-    // Counter animation for stats
-    const stats = document.querySelectorAll('.stat-number');
-    const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const target = entry.target;
-                const endValue = target.textContent;
-                const numericValue = parseInt(endValue.replace(/\D/g, ''));
-                const suffix = endValue.replace(/[0-9]/g, '');
-                
-                let current = 0;
-                const increment = numericValue / 50;
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= numericValue) {
-                        target.textContent = numericValue + suffix;
-                        clearInterval(timer);
-                    } else {
-                        target.textContent = Math.floor(current) + suffix;
-                    }
-                }, 30);
-                
-                statsObserver.unobserve(target);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    stats.forEach(stat => statsObserver.observe(stat));
-
-    console.log('🚀 Site loaded successfully');
-});
+console.log('🚀 Dar Fazulyanov - Valuation Expert | Site loaded');
