@@ -296,6 +296,49 @@ h1, h2, h3, h4 {
     overflow: hidden;
 }
 
+/* Video Background */
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+.hero-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(10, 10, 10, 0.7) 0%,
+        rgba(10, 10, 10, 0.8) 50%,
+        rgba(10, 10, 10, 0.95) 100%
+    );
+}
+
+@media (max-width: 768px) {
+    .hero-video-container {
+        display: none; /* Hide video on mobile for performance */
+    }
+}
+
 .hero-bg-glow {
     position: absolute;
     top: -50%;
@@ -309,6 +352,7 @@ h1, h2, h3, h4 {
         radial-gradient(ellipse at 70% 30%, rgba(34, 197, 94, 0.08) 0%, transparent 40%);
     pointer-events: none;
     animation: pulseGlow 8s ease-in-out infinite alternate;
+    z-index: 1;
 }
 
 @keyframes pulseGlow {
