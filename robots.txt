@@ -1,0 +1,6 @@
+# robots.txt for darfazulyanov.com
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://darfazulyanov.com/sitemap.xml
