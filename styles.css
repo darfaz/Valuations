@@ -333,11 +333,7 @@ h1, h2, h3, h4 {
     );
 }
 
-@media (max-width: 768px) {
-    .hero-video-container {
-        display: none; /* Hide video on mobile for performance */
-    }
-}
+/* Video now enabled on mobile - using CDN with good compression */
 
 .hero-bg-glow {
     position: absolute;
