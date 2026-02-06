@@ -1,3 +1,13 @@
+// Force video to play (handle autoplay restrictions)
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('hero-video');
+    if (video) {
+        video.play().catch(function(error) {
+            console.log('Video autoplay failed:', error);
+        });
+    }
+});
+
 // Mobile Menu Toggle
 const navToggle = document.querySelector('.nav-toggle');
 const mobileMenu = document.querySelector('.mobile-menu');
