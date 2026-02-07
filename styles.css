@@ -984,17 +984,10 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 15%;
     display: block;
     filter: grayscale(100%);
     transition: var(--transition-base);
-}
-
-/* Dar's photo - zoom out to show full face and shoulders */
-.team-image.dar-image img {
-    object-fit: contain;
-    object-position: center center;
-    background: var(--gray-200);
 }
 
 .team-card:hover .team-image img {
