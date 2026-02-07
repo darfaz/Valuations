@@ -990,6 +990,13 @@ h1, h2, h3, h4, h5, h6 {
     transition: var(--transition-base);
 }
 
+/* Dar's photo - zoom out to show full face and shoulders */
+.team-image.dar-image img {
+    object-fit: contain;
+    object-position: center center;
+    background: var(--gray-200);
+}
+
 .team-card:hover .team-image img {
     filter: grayscale(0%);
 }
